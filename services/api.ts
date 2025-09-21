@@ -5,6 +5,20 @@ import Constants from 'expo-constants';
 
 const env = Constants.expoConfig?.extra || {};
 
+// Helper function to build API URL with proper proxy prefix
+const buildApiUrl = (endpoint: string): string => {
+  const baseUrl = env.TMDB_URL || "https://api.themoviedb.org/3";
+  const isProxy = baseUrl.includes('workers.dev');
+  
+  if (isProxy) {
+    // For proxy, prepend /api/tmdb to the endpoint
+    return `${baseUrl}/api/tmdb${endpoint}`;
+  } else {
+    // For direct TMDB API, use endpoint as-is
+    return `${baseUrl}${endpoint}`;
+  }
+};
+
 export const TMDB_CONFIG = {
   BASE_URL: env.TMDB_URL || "https://api.themoviedb.org/3",
   MEDIA_URL: env.TMDB_MEDIA_URL || "https://image.tmdb.org",
@@ -19,17 +33,20 @@ export const TMDB_CONFIG = {
 };
 
 // Debug logging
-console.log("Environment Variables:", {
-  TMDB_URL: env.TMDB_URL,
-  MOVIE_API_KEY: env.MOVIE_API_KEY ? 'present' : 'missing',
-  allEnv: env,
+console.log('📡 Environment Variables:', {
+  TMDB_URL: env.TMDB_URL ? env.TMDB_URL : 'MISSING!',
+  MOVIE_API_KEY: env.MOVIE_API_KEY ? 'present' : 'MISSING!',
+  TMDB_MEDIA_URL: env.TMDB_MEDIA_URL ? env.TMDB_MEDIA_URL : 'MISSING!',
+  totalEnvVars: Object.keys(env).length,
+  __DEV__: typeof __DEV__ !== 'undefined' ? __DEV__ : 'undefined',
 });
 
-console.log("TMDB Config (Using Proxy):", {
+console.log('⚙️ TMDB Config (Production Safe):', {
   BASE_URL: TMDB_CONFIG.BASE_URL,
   MEDIA_URL: TMDB_CONFIG.MEDIA_URL,
   usingProxy: TMDB_CONFIG.BASE_URL.includes('workers.dev'),
   hasAPIKey: !!TMDB_CONFIG.API_KEY,
+  buildApiUrlTest: buildApiUrl('/test'),
 });
 
 export const fetchMovies = async ({
@@ -38,8 +55,8 @@ export const fetchMovies = async ({
   query: string;
 }): Promise<Movie[]> => {
   const endpoint = query
-    ? `${TMDB_CONFIG.BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-    : `${TMDB_CONFIG.BASE_URL}/discover/movie?sort_by=popularity.desc`;
+    ? buildApiUrl(`/search/movie?query=${encodeURIComponent(query)}`)
+    : buildApiUrl(`/discover/movie?sort_by=popularity.desc`);
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -59,7 +76,7 @@ export const fetchMovieDetails = async (
 ): Promise<MovieDetails> => {
   try {
     const response = await fetch(
-      `${TMDB_CONFIG.BASE_URL}/movie/${movieId}`,
+      buildApiUrl(`/movie/${movieId}`),
       {
         method: "GET",
         headers: TMDB_CONFIG.headers,
@@ -81,7 +98,7 @@ export const fetchMovieDetails = async (
 // Fetch trending movies
 export const fetchTrendingMovies = async (): Promise<Movie[]> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/trending/movie/day`;
+    const url = buildApiUrl('/trending/movie/day');
     console.log("Fetching trending movies from:", url);
 
     const response = await fetch(url, {
@@ -111,7 +128,7 @@ export const fetchTrendingMovies = async (): Promise<Movie[]> => {
 // Fetch popular people
 export const fetchPopularPeople = async (): Promise<Person[]> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/person/popular`;
+    const url = buildApiUrl('/person/popular');
     console.log("Fetching popular people from:", url);
 
     const response = await fetch(url, {
@@ -141,7 +158,7 @@ export const fetchPopularPeople = async (): Promise<Person[]> => {
 // Fetch popular movies
 export const fetchPopularMovies = async (): Promise<Movie[]> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/movie/popular`;
+    const url = buildApiUrl('/movie/popular');
     console.log("Fetching popular movies from:", url);
 
     const response = await fetch(url, {
@@ -171,7 +188,7 @@ export const fetchPopularMovies = async (): Promise<Movie[]> => {
 // Fetch trending TV shows
 export const fetchTrendingShows = async (): Promise<Show[]> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/trending/tv/day`;
+    const url = buildApiUrl('/trending/tv/day');
     console.log("Fetching trending shows from:", url);
 
     const response = await fetch(url, {
@@ -221,7 +238,7 @@ export const fetchShowDetails = async (
   showId: string
 ): Promise<ShowDetails> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/tv/${showId}`;
+    const url = buildApiUrl(`/tv/${showId}`);
     console.log("Fetching show details from:", url);
 
     const response = await fetch(url, {
@@ -253,7 +270,7 @@ export const fetchPersonDetails = async (
   personId: string
 ): Promise<PersonDetails> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/person/${personId}`;
+    const url = buildApiUrl(`/person/${personId}`);
     console.log("Fetching person details from:", url);
 
     const response = await fetch(url, {
@@ -285,7 +302,7 @@ export const fetchPersonCredits = async (
   personId: string
 ): Promise<CombinedCredits> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/person/${personId}/combined_credits`;
+    const url = buildApiUrl(`/person/${personId}/combined_credits`);
     console.log("Fetching person credits from:", url);
 
     const response = await fetch(url, {
@@ -317,7 +334,7 @@ export const fetchMovieVideos = async (
   movieId: string
 ): Promise<Videos> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/movie/${movieId}/videos`;
+    const url = buildApiUrl(`/movie/${movieId}/videos`);
     console.log("Fetching movie videos from:", url);
 
     const response = await fetch(url, {
@@ -349,7 +366,7 @@ export const fetchShowVideos = async (
   showId: string
 ): Promise<Videos> => {
   try {
-    const url = `${TMDB_CONFIG.BASE_URL}/tv/${showId}/videos`;
+    const url = buildApiUrl(`/tv/${showId}/videos`);
     console.log("Fetching show videos from:", url);
 
     const response = await fetch(url, {

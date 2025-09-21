@@ -5,17 +5,44 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "MOVIE_API_KEY": "not_needed_with_proxy",
+        "TMDB_URL": "https://tmdb-proxy.pritammondal-dev.workers.dev",
+        "TMDB_MEDIA_URL": "https://image.tmdb.org",
+        "APPWRITE_PROJECT_ID": "68cda924000a549f76b3",
+        "APPWRITE_DATABASE_ID": "68cda9f1000cc67756d8",
+        "APPWRITE_COLLECTION_ID": "metrics",
+        "APPWRITE_BOOKMARKS_COLLECTION_ID": "bookmarks"
+      }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "MOVIE_API_KEY": "not_needed_with_proxy",
+        "TMDB_URL": "https://tmdb-proxy.pritammondal-dev.workers.dev",
+        "TMDB_MEDIA_URL": "https://image.tmdb.org",
+        "APPWRITE_PROJECT_ID": "68cda924000a549f76b3",
+        "APPWRITE_DATABASE_ID": "68cda9f1000cc67756d8",
+        "APPWRITE_COLLECTION_ID": "metrics",
+        "APPWRITE_BOOKMARKS_COLLECTION_ID": "bookmarks"
       }
     },
     "production": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "MOVIE_API_KEY": "not_needed_with_proxy",
+        "TMDB_URL": "https://tmdb-proxy.pritammondal-dev.workers.dev",
+        "TMDB_MEDIA_URL": "https://image.tmdb.org",
+        "APPWRITE_PROJECT_ID": "68cda924000a549f76b3",
+        "APPWRITE_DATABASE_ID": "68cda9f1000cc67756d8",
+        "APPWRITE_COLLECTION_ID": "metrics",
+        "APPWRITE_BOOKMARKS_COLLECTION_ID": "bookmarks"
       }
     }
   },
