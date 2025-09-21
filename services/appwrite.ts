@@ -1,4 +1,4 @@
-import { Client, Databases, ID, Query, Account } from "react-native-appwrite";
+import { Client, Databases, ID, Query, Account, OAuthProvider } from "react-native-appwrite";
 import { User, Bookmark, CreateBookmarkData } from "@/interfaces/interfaces";
 import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
@@ -67,28 +67,29 @@ export const getTrendingMovies = async (): Promise<
 // AUTHENTICATION SERVICES
 // ===========================================
 
-// Login with Google
+// Login with Google - Using localhost redirect that Appwrite accepts
 export const loginWithGoogle = async (): Promise<void> => {
   try {
     console.log('Starting Google OAuth flow...');
     
-    // Create redirect URI for OAuth callback
-    const redirectUri = Linking.createURL('/');
-    console.log('Redirect URI:', redirectUri);
+    // Use localhost redirect URI that Appwrite will accept
+    const redirectUri = 'http://localhost:3000/auth/callback';
+    console.log('Using localhost redirect URI:', redirectUri);
     
-    // Create OAuth2 token - this returns a URL to open
+    // Create OAuth2 token with localhost redirect
     const response = await account.createOAuth2Token(
-      'google' as any, // OAuthProvider.Google
+      OAuthProvider.Google,
       redirectUri
     );
     
     if (!response) {
-      throw new Error('Failed to create OAuth2 token');
+      throw new Error('Create OAuth2 token failed');
     }
     
     console.log('OAuth token created, opening browser...');
+    console.log('OAuth URL:', response.toString());
     
-    // Open the OAuth URL in a web browser
+    // Open the OAuth URL in browser with localhost return
     const browserResult = await WebBrowser.openAuthSessionAsync(
       response.toString(),
       redirectUri
@@ -105,26 +106,29 @@ export const loginWithGoogle = async (): Promise<void> => {
     const secret = url.searchParams.get('secret')?.toString();
     const userId = url.searchParams.get('userId')?.toString();
     
-    console.log('OAuth callback received, creating session...');
+    console.log('OAuth callback received');
+    console.log('Callback URL:', browserResult.url);
+    console.log('Secret present:', !!secret, 'UserId present:', !!userId);
     
     if (!secret || !userId) {
       throw new Error('Failed to get OAuth credentials from callback');
     }
     
-    // Create a session using the OAuth credentials
+    // Create session with the OAuth credentials
     const session = await account.createSession(userId, secret);
     if (!session) {
       throw new Error('Failed to create session');
     }
     
-    console.log('Session created successfully!');
+    console.log('OAuth login successful!');
     return;
   } catch (error: any) {
     console.error('Google login error:', error);
     console.error('Error details:', {
       message: error?.message,
       type: error?.type,
-      code: error?.code
+      code: error?.code,
+      response: error?.response
     });
     throw error;
   }
@@ -186,7 +190,7 @@ export const createBookmark = async (bookmarkData: CreateBookmarkData): Promise<
   try {
     const user = await getCurrentUser();
     if (!user) throw new Error('User not authenticated');
-    
+
     const bookmark = await database.createDocument(
       DATABASE_ID,
       BOOKMARKS_COLLECTION_ID,
@@ -211,7 +215,7 @@ export const getUserBookmarks = async (mediaType?: 'movie' | 'tv' | 'person'): P
     if (!user) throw new Error('User not authenticated');
 
     const queries = [Query.equal('userId', user.$id)];
-    
+
     if (mediaType) {
       queries.push(Query.equal('mediaType', mediaType));
     }
@@ -287,7 +291,7 @@ export const removeBookmark = async (mediaId: number, mediaType: 'movie' | 'tv' 
 export const toggleBookmark = async (bookmarkData: CreateBookmarkData): Promise<boolean> => {
   try {
     const isCurrentlyBookmarked = await isBookmarked(bookmarkData.mediaId, bookmarkData.mediaType);
-    
+
     if (isCurrentlyBookmarked) {
       await removeBookmark(bookmarkData.mediaId, bookmarkData.mediaType);
       return false;
