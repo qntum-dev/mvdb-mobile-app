@@ -5,14 +5,17 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { icons } from "@/constants/icons";
 import useFetch from "@/services/usefetch";
 import { fetchShowDetails, fetchShowVideos, getShowPosterUrl } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { useBookmarks } from "@/context/BookmarkContext";
 import VideoModal from "@/components/VideoModal";
 import { Video } from "@/interfaces/interfaces";
 
@@ -33,8 +36,11 @@ const ShowInfo = ({ label, value }: ShowInfoProps) => (
 const Details = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { isAuthenticated } = useAuth();
+  const { toggleBookmark, isBookmarked, refreshBookmarks } = useBookmarks();
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const { data: show, loading: showLoading } = useFetch(() =>
     fetchShowDetails(id as string)
@@ -43,6 +49,39 @@ const Details = () => {
   const { data: videos, loading: videosLoading } = useFetch(() =>
     fetchShowVideos(id as string)
   );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshBookmarks();
+    }
+  }, [isAuthenticated]);
+
+  const handleBookmarkToggle = async () => {
+    if (!isAuthenticated) {
+      Alert.alert('Authentication Required', 'Please sign in to bookmark TV shows.');
+      return;
+    }
+
+    if (!show) return;
+
+    try {
+      setBookmarkLoading(true);
+      await toggleBookmark({
+        mediaType: 'tv',
+        mediaId: show.id,
+        title: show.name,
+        posterPath: show.poster_path,
+        rating: Math.round(show.vote_average * 10), // Convert to integer (e.g., 7.5 -> 75)
+        releaseDate: show.first_air_date,
+        overview: show.overview,
+      });
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      Alert.alert('Error', 'Failed to update bookmark. Please try again.');
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   const handlePlayPress = () => {
     if (videos && videos.results && videos.results.length > 0) {
@@ -87,6 +126,25 @@ const Details = () => {
               resizeMode="stretch"
             />
           </TouchableOpacity>
+          
+          {/* Bookmark Button */}
+          {isAuthenticated && (
+            <TouchableOpacity 
+              className="absolute bottom-5 left-5 rounded-full size-14 bg-black/70 flex items-center justify-center"
+              onPress={handleBookmarkToggle}
+              disabled={bookmarkLoading}
+            >
+              {bookmarkLoading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Image
+                  source={icons.save}
+                  className="size-6"
+                  tintColor={show && isBookmarked(show.id, 'tv') ? "#ef4444" : "#ffffff"}
+                />
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         <View className="flex-col items-start justify-center mt-5 px-5">

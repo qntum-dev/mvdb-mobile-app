@@ -366,3 +366,53 @@ export interface CombinedCredits {
   crew: Crew[]
   id: number
 }
+
+// Authentication Interfaces
+export interface User {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  name: string;
+  email: string;
+  phone?: string;
+  emailVerification: boolean;
+  phoneVerification: boolean;
+  prefs: Record<string, any>;
+}
+
+export interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+// Bookmark Interfaces
+export interface Bookmark {
+  $id?: string;
+  userId: string;
+  mediaType: 'movie' | 'tv' | 'person';
+  mediaId: number;
+  title: string;
+  posterPath?: string;
+  rating?: number;
+  releaseDate?: string;
+  overview?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookmarkResponse {
+  bookmarks: Bookmark[];
+  total: number;
+}
+
+// Bookmark creation data
+export interface CreateBookmarkData {
+  mediaType: 'movie' | 'tv' | 'person';
+  mediaId: number;
+  title: string;
+  posterPath?: string;
+  rating?: number;
+  releaseDate?: string;
+  overview?: string;
+}

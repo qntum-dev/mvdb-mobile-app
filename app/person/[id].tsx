@@ -7,8 +7,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState, useEffect } from "react";
 
 import { icons } from "@/constants/icons";
 import { Cast_Credits } from "@/interfaces/interfaces";
@@ -19,6 +21,8 @@ import {
   getPersonProfileUrl,
   getShowPosterUrl,
 } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { useBookmarks } from "@/context/BookmarkContext";
 import useFetch from "@/services/usefetch";
 
 interface PersonInfoProps {
@@ -70,6 +74,9 @@ const CreditCard = ({ credit }: { credit: Cast_Credits }) => {
 const Details = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { isAuthenticated } = useAuth();
+  const { toggleBookmark, isBookmarked, refreshBookmarks } = useBookmarks();
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   const { data: person, loading: personLoading } = useFetch(() =>
     fetchPersonDetails(id as string)
@@ -78,6 +85,37 @@ const Details = () => {
   const { data: credits, loading: creditsLoading } = useFetch(() =>
     fetchPersonCredits(id as string)
   );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshBookmarks();
+    }
+  }, [isAuthenticated]);
+
+  const handleBookmarkToggle = async () => {
+    if (!isAuthenticated) {
+      Alert.alert('Authentication Required', 'Please sign in to bookmark people.');
+      return;
+    }
+
+    if (!person) return;
+
+    try {
+      setBookmarkLoading(true);
+      await toggleBookmark({
+        mediaType: 'person',
+        mediaId: person.id,
+        title: person.name,
+        posterPath: person.profile_path,
+        overview: person.biography ? person.biography.substring(0, 200) + (person.biography.length > 200 ? '...' : '') : undefined,
+      });
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      Alert.alert('Error', 'Failed to update bookmark. Please try again.');
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   if (personLoading || creditsLoading)
     return (
@@ -110,6 +148,25 @@ const Details = () => {
 
           <View className="flex-1 ml-4">
             <Text className="text-white font-bold text-2xl">{person?.name}</Text>
+            
+            {/* Bookmark Button */}
+            {isAuthenticated && (
+              <TouchableOpacity 
+                className="absolute top-0 right-0 rounded-full size-10 bg-black/70 flex items-center justify-center"
+                onPress={handleBookmarkToggle}
+                disabled={bookmarkLoading}
+              >
+                {bookmarkLoading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Image
+                    source={icons.save}
+                    className="size-5"
+                    tintColor={person && isBookmarked(person.id, 'person') ? "#ef4444" : "#ffffff"}
+                  />
+                )}
+              </TouchableOpacity>
+            )}
 
             <PersonInfo
               label="Known For"

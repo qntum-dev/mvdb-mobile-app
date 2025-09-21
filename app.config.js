@@ -7,7 +7,7 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icons/logo.png",
-    scheme: "myapp",
+    scheme: "mvdb",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
@@ -48,6 +48,10 @@ export default {
       MOVIE_API_KEY: process.env.MOVIE_API_KEY,
       TMDB_URL: process.env.TMDB_URL,
       TMDB_MEDIA_URL: process.env.TMDB_MEDIA_URL,
+      APPWRITE_PROJECT_ID: process.env.APPWRITE_PROJECT_ID,
+      APPWRITE_DATABASE_ID: process.env.APPWRITE_DATABASE_ID,
+      APPWRITE_COLLECTION_ID: process.env.APPWRITE_COLLECTION_ID,
+      APPWRITE_BOOKMARKS_COLLECTION_ID: process.env.APPWRITE_BOOKMARKS_COLLECTION_ID,
     }
   }
 };
