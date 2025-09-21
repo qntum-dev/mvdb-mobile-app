@@ -148,10 +148,10 @@ const Details = () => {
 
           <View className="flex-1 ml-4">
             <Text className="text-white font-bold text-2xl">{person?.name}</Text>
-            
+
             {/* Bookmark Button */}
             {isAuthenticated && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="absolute top-0 right-0 rounded-full size-10 bg-black/70 flex items-center justify-center"
                 onPress={handleBookmarkToggle}
                 disabled={bookmarkLoading}
@@ -235,8 +235,8 @@ const Details = () => {
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        className="absolute bottom-5 left-0 right-0 mx-5 bg-accent rounded-lg py-3.5 flex flex-row items-center justify-center z-50"
+      {/* <TouchableOpacity
+        className="absolute bottom-5 left-0 right-0 mx-5 bg-[#dc2626] rounded-lg py-3.5 flex flex-row items-center justify-center z-50"
         onPress={router.back}
       >
         <Image
@@ -245,7 +245,7 @@ const Details = () => {
           tintColor="#fff"
         />
         <Text className="text-white font-semibold text-base">Go Back</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </SafeAreaView>
   );
 };
