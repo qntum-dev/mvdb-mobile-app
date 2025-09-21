@@ -6,19 +6,29 @@ import Constants from 'expo-constants';
 const env = Constants.expoConfig?.extra || {};
 
 export const TMDB_CONFIG = {
-  BASE_URL: env.TMDB_URL || "https://api.themoviedb.org/3",
+  BASE_URL: env.TMDB_URL ? `${env.TMDB_URL}/api/tmdb` : "https://api.themoviedb.org/3",
   MEDIA_URL: env.TMDB_MEDIA_URL || "https://image.tmdb.org",
-  API_KEY: env.MOVIE_API_KEY,
+  API_KEY: env.MOVIE_API_KEY, // Not used when using proxy, but kept for backward compatibility
   headers: {
     accept: "application/json",
-    Authorization: `Bearer ${env.MOVIE_API_KEY}`,
+    // Authorization header removed when using proxy - proxy handles authentication
+    ...(!(env.TMDB_URL && env.TMDB_URL.includes('workers.dev')) && {
+      Authorization: `Bearer ${env.MOVIE_API_KEY}`
+    })
   },
 };
 
 // Debug logging
-console.log("TMDB Config:", {
+console.log("Environment Variables:", {
+  TMDB_URL: env.TMDB_URL,
+  MOVIE_API_KEY: env.MOVIE_API_KEY ? 'present' : 'missing',
+  allEnv: env,
+});
+
+console.log("TMDB Config (Using Proxy):", {
   BASE_URL: TMDB_CONFIG.BASE_URL,
   MEDIA_URL: TMDB_CONFIG.MEDIA_URL,
+  usingProxy: TMDB_CONFIG.BASE_URL.includes('workers.dev'),
   hasAPIKey: !!TMDB_CONFIG.API_KEY,
 });
 
@@ -49,7 +59,7 @@ export const fetchMovieDetails = async (
 ): Promise<MovieDetails> => {
   try {
     const response = await fetch(
-      `${TMDB_CONFIG.BASE_URL}/movie/${movieId}?api_key=${TMDB_CONFIG.API_KEY}`,
+      `${TMDB_CONFIG.BASE_URL}/movie/${movieId}`,
       {
         method: "GET",
         headers: TMDB_CONFIG.headers,

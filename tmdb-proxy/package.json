@@ -1,0 +1,29 @@
+{
+  "name": "tmdb-proxy",
+  "version": "1.0.0",
+  "description": "A Hono.js Cloudflare Worker proxy for TMDB API and other APIs",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler build",
+    "preview": "wrangler preview"
+  },
+  "keywords": [
+    "hono",
+    "cloudflare-worker",
+    "proxy",
+    "tmdb",
+    "api"
+  ],
+  "author": "Pritam Mondal",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^3.12.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231025.0",
+    "typescript": "^5.2.0",
+    "wrangler": "^4.38.0"
+  }
+}

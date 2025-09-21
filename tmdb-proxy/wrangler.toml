@@ -1,0 +1,26 @@
+name = "tmdb-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables (set these in Cloudflare dashboard or via wrangler secret)
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+# CORS settings
+[vars]
+CORS_ORIGINS = "*"
+ALLOWED_METHODS = "GET,POST,PUT,DELETE,OPTIONS"
+ALLOWED_HEADERS = "Content-Type,Authorization,X-API-Key"
+
+# Rate limiting (optional)
+# [triggers]
+# crons = ["0 0 * * *"]
+
+# KV namespaces for caching (optional)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"

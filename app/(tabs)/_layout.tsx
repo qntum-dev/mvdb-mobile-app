@@ -33,14 +33,13 @@ export default function TabsLayout() {
         tabBarItemStyle: {
           width: "100%",
           height: "100%",
-          justifyContent: "center",
           alignItems: "center",
         },
         tabBarStyle: {
           backgroundColor: "#000000",
           borderRadius: 50,
           marginHorizontal: 20,
-          marginBottom: 36,
+          marginBottom: 60,
           height: 52,
           position: "absolute",
           overflow: "hidden",
