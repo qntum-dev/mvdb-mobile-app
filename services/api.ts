@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 const env = Constants.expoConfig?.extra || {};
 
 export const TMDB_CONFIG = {
-  BASE_URL: env.TMDB_URL ? `${env.TMDB_URL}/api/tmdb` : "https://api.themoviedb.org/3",
+  BASE_URL: env.TMDB_URL || "https://api.themoviedb.org/3",
   MEDIA_URL: env.TMDB_MEDIA_URL || "https://image.tmdb.org",
   API_KEY: env.MOVIE_API_KEY, // Not used when using proxy, but kept for backward compatibility
   headers: {
