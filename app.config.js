@@ -1,5 +1,17 @@
 require('dotenv').config();
 
+// Check if we have environment variables loaded, if not use defaults for production
+if (!process.env.TMDB_URL) {
+  // Set production defaults if .env files aren't loaded
+  process.env.TMDB_URL = 'https://tmdb-proxy.pritammondal-dev.workers.dev';
+  process.env.MOVIE_API_KEY = 'not_needed_with_proxy';
+  process.env.TMDB_MEDIA_URL = 'https://image.tmdb.org';
+  process.env.APPWRITE_PROJECT_ID = '68cda924000a549f76b3';
+  process.env.APPWRITE_DATABASE_ID = '68cda9f1000cc67756d8';
+  process.env.APPWRITE_COLLECTION_ID = 'metrics';
+  process.env.APPWRITE_BOOKMARKS_COLLECTION_ID = 'bookmarks';
+}
+
 export default {
   expo: {
     name: "mvdb",
