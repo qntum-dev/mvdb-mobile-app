@@ -2,7 +2,23 @@ import { Client, Databases, ID, Query, Account, OAuthProvider } from "react-nati
 import { User, Bookmark, CreateBookmarkData } from "@/interfaces/interfaces";
 import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
+import { makeRedirectUri } from 'expo-auth-session';
+
+// Add these type definitions if they're not in your interfaces file
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+}
+
+interface TrendingMovie {
+  $id: string;
+  searchTerm: string;
+  movie_id: number;
+  title: string;
+  count: number;
+  poster_url: string;
+}
 
 const DATABASE_ID = Constants.expoConfig?.extra?.APPWRITE_DATABASE_ID!;
 const SEARCH_COLLECTION_ID = Constants.expoConfig?.extra?.APPWRITE_COLLECTION_ID!;
@@ -47,9 +63,7 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
   }
 };
 
-export const getTrendingMovies = async (): Promise<
-  TrendingMovie[] | undefined
-> => {
+export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> => {
   try {
     const result = await database.listDocuments(DATABASE_ID, SEARCH_COLLECTION_ID, [
       Query.limit(5),
@@ -67,69 +81,58 @@ export const getTrendingMovies = async (): Promise<
 // AUTHENTICATION SERVICES
 // ===========================================
 
-// Login with Google - Using localhost redirect that Appwrite accepts
+// Login with Google - Using the recommended Appwrite mobile OAuth flow
 export const loginWithGoogle = async (): Promise<void> => {
   try {
-    console.log('Starting Google OAuth flow...');
-    
-    // Use localhost redirect URI that Appwrite will accept
-    const redirectUri = 'http://localhost:3000/auth/callback';
-    console.log('Using localhost redirect URI:', redirectUri);
-    
-    // Create OAuth2 token with localhost redirect
-    const response = await account.createOAuth2Token(
-      OAuthProvider.Google,
-      redirectUri
-    );
-    
-    if (!response) {
-      throw new Error('Create OAuth2 token failed');
-    }
-    
-    console.log('OAuth token created, opening browser...');
-    console.log('OAuth URL:', response.toString());
-    
-    // Open the OAuth URL in browser with localhost return
-    const browserResult = await WebBrowser.openAuthSessionAsync(
-      response.toString(),
-      redirectUri
-    );
-    
-    console.log('Browser result:', browserResult);
-    
-    if (browserResult.type !== 'success') {
-      throw new Error('OAuth flow was cancelled or failed');
-    }
-    
-    // Extract secret and userId from the callback URL
-    const url = new URL(browserResult.url);
-    const secret = url.searchParams.get('secret')?.toString();
-    const userId = url.searchParams.get('userId')?.toString();
-    
-    console.log('OAuth callback received');
-    console.log('Callback URL:', browserResult.url);
-    console.log('Secret present:', !!secret, 'UserId present:', !!userId);
-    
-    if (!secret || !userId) {
-      throw new Error('Failed to get OAuth credentials from callback');
-    }
-    
-    // Create session with the OAuth credentials
-    const session = await account.createSession(userId, secret);
-    if (!session) {
-      throw new Error('Failed to create session');
-    }
-    
-    console.log('OAuth login successful!');
-    return;
-  } catch (error: any) {
-    console.error('Google login error:', error);
-    console.error('Error details:', {
-      message: error?.message,
-      type: error?.type,
-      code: error?.code,
-      response: error?.response
+    console.log('Starting Google OAuth flow with createOAuth2Token...');
+
+    // Create proper redirect URI using expo-auth-session
+    const redirectUri = makeRedirectUri({
+      preferLocalhost: true,
+      scheme: 'appwrite-callback-68cda924000a549f76b3' // Your PROJECT_ID
     });
+
+    console.log('Redirect URI:', redirectUri);
+
+    // Create the OAuth2 token URL
+    const loginUrl = await account.createOAuth2Token(
+      OAuthProvider.Google,
+      redirectUri,
+      redirectUri // Use same URI for success and failure
+    );
+
+    // Open the browser with the OAuth URL
+    const result = await WebBrowser.openAuthSessionAsync(
+      loginUrl.toString(),
+      redirectUri
+    );
+
+    // Check if the user completed the flow
+    if (result.type === 'success' && result.url) {
+      // Extract the secret and userId from the callback URL
+      const url = new URL(result.url);
+      const secret = url.searchParams.get('secret');
+      const userId = url.searchParams.get('userId');
+
+      if (secret && userId) {
+        // Create the session manually using the extracted credentials
+        await account.createSession(userId, secret);
+
+        const user = await getCurrentUser();
+        if (user) {
+          console.log('OAuth login successful! User:', user.name);
+        }
+      } else {
+        throw new Error('Missing OAuth credentials in callback URL');
+      }
+    } else if (result.type === 'cancel') {
+      console.log('OAuth flow was cancelled by user');
+    } else {
+      console.log('OAuth flow failed:', result);
+    }
+
+  } catch (error: any) {
+    console.error('Google login error:', error.message);
     throw error;
   }
 };
