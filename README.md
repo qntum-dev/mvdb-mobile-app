@@ -2,6 +2,9 @@
 
 A sleek and dynamic movie discovery mobile app built with **React Native**, **Expo**, and **NativeWind**. Browse trending, latest, and popular movies, dive into cast and crew details, and explore profiles of your favorite celebrities.
 
+[You can download the latest release here⬇️](../../releases/latest)
+
+
 ## 🚀 Features
 
 - 🔍 **Movie Discovery**
