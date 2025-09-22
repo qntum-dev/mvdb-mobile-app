@@ -16,9 +16,8 @@ A sleek and dynamic movie discovery mobile app built with **React Native**, **Ex
 - 🌟 **Celebrity Profiles**
   - Find detailed info about actors, directors, and more
 - 🔎 **Search Functionality**
-  - Instant search for movies or celebrities with suggestions
-- 📱 **Responsive Design**
-  - Optimized for mobile, tablet, and desktop
+  - Instant search for movies
+
 
 ---
 
