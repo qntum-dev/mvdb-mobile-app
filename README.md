@@ -1,6 +1,6 @@
 # 🎬 MVDB Mobile App
 
-A sleek and dynamic movie discovery mobile app built with **React Native**, **Expo**, and **NativeWind**. Browse trending, latest, and popular movies, dive into cast and crew details, and explore profiles of your favorite celebrities.
+A sleek and dynamic movie discovery mobile app built with **React Native**, **Expo**, and **Appwrite**. Browse trending, latest, and popular movies, dive into cast and crew details, and explore profiles of your favorite celebrities.
 
 [You can download the latest release here⬇️](../../releases/latest)
 
@@ -25,6 +25,7 @@ A sleek and dynamic movie discovery mobile app built with **React Native**, **Ex
 ## 🛠️ Tech Stack
 
 - **React Native** – Server-side rendering & routing
+- **Appwrite** – For Backend
 - **Expo** – Strongly typed JavaScript
 - **Native Wind** – Utility-first CSS framework
 - **TMDb API** – Movie and celebrity data
